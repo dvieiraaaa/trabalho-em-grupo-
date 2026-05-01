@@ -13,33 +13,26 @@
 | [Davi Vieira]     | [@dvieiraaaa]   |
 | [Warley Mendes]   | [@warley1137]   |
 
-## arquitetura
 
-```mermaid
-flowchart TD
-    A[Usuário acessa app] --> B[Digite artista ou cidade]
-    B --> C[Buscar shows]
-    C --> D{Resultados encontrados?}
-
-    D -- Sim --> E[Listar eventos]
-    E --> F[Ver detalhes do show]
-    F --> G[Comprar ingresso]
-
-    D -- Não --> H[Mostrar mensagem: nenhum show encontrado]
-    H --> I[Sugerir artistas populares]
-
-    E --> J[Filtros]
-    J --> K[Data]
-    J --> L[Local]
-    J --> M[Preço]
-```
 ### Como funciona
 
 ```mermaid
-graph TD
-    User([Usuário]) -->|Entrada de dados| System[Sistema Backend]
-    System -->|Consulta| APIs{APIs Externas}
-    APIs -->|Dados brutos| System
-    System -->|Contexto + Prompt| Gemini[Gemini AI]
-    Gemini -->|Resposta gerada| System
-    System -->|Saída formatada| User
+flowchart TD
+    %% Entrada do Usuário
+    A[Usuário: Digita Artista/Cidade] --> B[Sistema: Recebe Input]
+
+    %% Processamento e APIs
+    B --> C[Consulta APIs Externas: Ticketmaster/Eventos]
+    C --> D{Resultados encontrados?}
+
+    %% Integração com Gemini
+    D -- Sim --> E[Enviar Dados para Gemini AI]
+    D -- Não --> E[Enviar Contexto de Erro para Gemini AI]
+    
+    E --> F{Processamento Gemini}
+    F -->|Análise| G[Refinar Sugestões e Detalhes]
+    F -->|Personalização| H[Gerar Insights/Resumo dos Shows]
+
+    %% Saída para o Usuário
+    G & H --> I[Sistema: Formata Resposta Final]
+    I --> J[Usuário: Visualiza Lista e Recomendações]
