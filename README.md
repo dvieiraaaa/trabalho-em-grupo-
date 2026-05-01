@@ -14,7 +14,7 @@
 | [Warley Mendes]   | [@warley1137]   |
 
 
-### Como funciona
+### Diagrama
 
 ```mermaid
 flowchart TD
@@ -36,3 +36,7 @@ flowchart TD
     %% Saída para o Usuário
     G & H --> I[Sistema: Formata Resposta Final]
     I --> J[Usuário: Visualiza Lista e Recomendações]
+```
+### Como funciona
+
+O usuário informa o nome de um artista pesquisar. O sistema então consulta APIs de eventos para buscar dados atualizados e envia essas informações para o Gemini AI. A IA processa os dados brutos, organiza as informações de forma clara. Por fim, o usuário recebe uma lista detalhada e formatada com as melhores opções de shows e eventos.
