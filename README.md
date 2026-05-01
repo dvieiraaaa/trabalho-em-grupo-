@@ -33,3 +33,13 @@ flowchart TD
     J --> L[Local]
     J --> M[Preço]
 ```
+### Como funciona
+
+```mermaid
+graph TD
+    User([Usuário]) -->|Entrada de dados| System[Sistema Backend]
+    System -->|Consulta| APIs{APIs Externas}
+    APIs -->|Dados brutos| System
+    System -->|Contexto + Prompt| Gemini[Gemini AI]
+    Gemini -->|Resposta gerada| System
+    System -->|Saída formatada| User
