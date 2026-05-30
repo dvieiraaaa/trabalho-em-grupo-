@@ -1,0 +1,310 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Radar de Shows",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "=Nome do Artista"
+            }
+          ]
+        },
+        "options": {
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Radar finalizado! Se encontramos shows, a lista foi gerada com sucesso."
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -976,
+        96
+      ],
+      "id": "758eabc4-ebeb-46fa-9967-737e4031b30b",
+      "name": "On form submission",
+      "webhookId": "e2278336-734e-4495-a6e1-c0646786361d"
+    },
+    {
+      "parameters": {
+        "url": "=https://app.ticketmaster.com/discovery/v2/events.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "iMBnzMmQKBPqJ8ff3CBMtha1m6o88ek3"
+            },
+            {
+              "name": "keyword",
+              "value": "={{ $json[\"Nome do Artista\"] }}"
+            },
+            {
+              "name": "size",
+              "value": "5"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -768,
+        96
+      ],
+      "id": "23a0aec9-35eb-48d7-8250-57fcf2ca401c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "935a3038-c9b0-426a-a558-9e4b76c9db6c",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -352,
+        96
+      ],
+      "id": "aa67a12d-ef65-425a-9270-bce8ab23a6d0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cba396ff-d656-44c5-ab27-5e4a821349eb",
+              "name": "Evento",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "c7119f11-9d1d-4f0e-991d-390296cc4c43",
+              "name": "Dia",
+              "value": "={{ $json.dates.start.localDate }}",
+              "type": "string"
+            },
+            {
+              "id": "84b0a0ba-036b-4f9a-bbc6-d5aa22bd6985",
+              "name": "Horas",
+              "value": "={{ $json.dates.start.localTime }}",
+              "type": "string"
+            },
+            {
+              "id": "8e96d14c-e1f1-4a19-b810-8385b0e67d51",
+              "name": "Endereço",
+              "value": "={{ $json._embedded.venues[0].address }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        0
+      ],
+      "id": "d089d19d-454d-4855-8a28-ef6afb21f2e2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        192
+      ],
+      "id": "46688985-b9d7-4aae-ab26-e249ea05b1f3",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "793f1ed9-5eb9-4610-b79b-8d2b384cda3b",
+              "name": "mensagem_final",
+              "value": "={{ $('Message a model').item.json.content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        0
+      ],
+      "id": "d01bec67-ac21-4bf7-b46f-71093214d6e4",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "_embedded.events",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        96
+      ],
+      "id": "09406ceb-3ba6-48fd-ad78-71c12bf7f63a",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Você é um assistente especializado em criar convites engajantes para shows e eventos.\n\nGere um convite curto, animado e empolgante com base nos seguintes dados:\n- Artista/Evento: {{ $json.Evento }}\n- Data: {{ $json.Dia }}\n- Horário: {{ $json.Horas }}\n- Local: {{ $json['Endereço'] }}\n\nRegras:\n1. Vá direto ao ponto e gere apenas o texto do convite.\n2. Use emojis de forma moderada para torná-lo atraente.\n3. Não adicione notas de rodapé, explicações ou comentários sobre a formatação dos dados recebidos.",
+              "role": "model"
+            },
+            {}
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        0
+      ],
+      "id": "7a014ffc-7e41-45ac-a907-7bdfc07788af",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NIEFJBLSnozI71ks",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3f2f45ef-30d7-46f7-bd39-f293ab7348f5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0a629949e3a4e23101db12d7ab1ded4c1a5c61ed4a2e091dc12af493d18bcc96"
+  },
+  "id": "GW1Cd0yOuO9oywlA",
+  "tags": []
+}
